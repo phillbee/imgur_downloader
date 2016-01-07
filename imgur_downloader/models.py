@@ -14,7 +14,7 @@ class Post:
     def __init__(self, response):
         parsed = html.fromstring(response.content)
 
-        self.image_urls = self.__find_images(parsed)
+        self.images = self._find_image_names(parsed)
 
         self.url = response.url.ljust(32)
         self.points = int(parsed.xpath('//*[@id="under-image"]/div/div[1]/div[1]/span[1]/text()')[0].translate(None, ','))
@@ -25,7 +25,8 @@ class Post:
         else:
             self.topic = ""
 
-    def __find_images(self, parsed):
+    @staticmethod
+    def _find_image_names(parsed):
         image_urls = parsed.xpath('//*[@class="post-image"]/a/@href')
         if not image_urls:
             image_urls = parsed.xpath('//*[@class="post-image"]/img/@src')
@@ -38,5 +39,4 @@ class Post:
                 end_quote = script.index("'", start_quote + 1)
                 gif_url = script[start_quote + 1: end_quote]
                 image_urls.append(gif_url)
-        # self.img_urls = [urlparse.urljoin(starting_page_response.url, url) for url in img_urls]
-        return image_urls
+        return [url.split('/')[-1] for url in image_urls]
